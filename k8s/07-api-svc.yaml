@@ -1,0 +1,24 @@
+# ============================================
+# Node.js API Service (LoadBalancer)
+# Project: Node.js + MongoDB
+# Author: Aamir Qureshi
+# ============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-api-svc
+  namespace: mca-app
+  labels:
+    app: nodejs-api
+  annotations:
+    cloud.google.com/load-balancer-type: "External"
+spec:
+  type: LoadBalancer
+  selector:
+    app: nodejs-api
+  ports:
+    - port: 80
+      targetPort: 3000
+      name: http
+  sessionAffinity: ClientIP
+

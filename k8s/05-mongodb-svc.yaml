@@ -1,0 +1,21 @@
+# ============================================
+# MongoDB Service (Headless for StatefulSet)
+# Project: Node.js + MongoDB
+# Author: Aamir Qureshi
+# ============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-svc
+  namespace: mca-app
+  labels:
+    app: mongodb
+spec:
+  clusterIP: None  # Headless service
+  selector:
+    app: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+      name: mongo
+

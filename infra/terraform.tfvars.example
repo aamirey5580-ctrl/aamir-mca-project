@@ -1,0 +1,27 @@
+# ==========================================================
+# Terraform Configuration - COPY TO terraform.tfvars
+# Project: Node.js + MongoDB on GKE
+# Author: Aamir Qureshi
+# ==========================================================
+
+# GCP Project ID (REQUIRED - Change this!)
+gcp_project = "your-gcp-project-id"
+
+# Region and Zone
+gcp_region = "asia-south1"
+gcp_zone   = "asia-south1-a"
+
+# Environment
+environment = "dev"
+
+# Network Settings
+subnet_cidr = "10.10.0.0/24"
+pod_cidr    = "10.20.0.0/16"
+svc_cidr    = "10.30.0.0/20"
+
+# GKE Settings
+node_count      = 2
+machine_type    = "e2-small"
+disk_size       = 30
+use_preemptible = true
+

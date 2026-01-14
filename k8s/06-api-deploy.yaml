@@ -1,0 +1,98 @@
+# ============================================
+# Node.js API Deployment
+# Project: Node.js + MongoDB
+# Author: Aamir Qureshi
+# ============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-api
+  namespace: mca-app
+  labels:
+    app: nodejs-api
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nodejs-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: nodejs-api
+        tier: backend
+    spec:
+      # Wait for MongoDB to be ready
+      initContainers:
+        - name: wait-mongo
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z mongodb-svc 27017; do echo waiting for mongodb; sleep 3; done;']
+      
+      containers:
+        - name: api
+          # Using public Node.js image with our app
+          # In production, use your own container registry
+          image: node:20-alpine
+          workingDir: /app
+          command: ["node", "server.js"]
+          
+          ports:
+            - containerPort: 3000
+              name: http
+          
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NODE_ENV
+            
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: PORT
+            
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: mongo-uri
+          
+          volumeMounts:
+            - name: app-code
+              mountPath: /app
+          
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+          
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      
+      volumes:
+        - name: app-code
+          configMap:
+            name: nodejs-app-code
+

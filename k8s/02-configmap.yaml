@@ -1,0 +1,56 @@
+# ============================================
+# ConfigMap Configuration
+# Project: Node.js + MongoDB
+# Author: Aamir Qureshi
+# ============================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: mca-app
+  labels:
+    app: nodejs-api
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-init
+  namespace: mca-app
+  labels:
+    app: mongodb
+data:
+  init-db.js: |
+    // MongoDB Initialization Script
+    db = db.getSiblingDB('mca_project');
+    
+    // Create collections
+    db.createCollection('tasks');
+    
+    // Insert sample data
+    db.tasks.insertMany([
+      {
+        title: 'Learn Terraform',
+        description: 'Study IaC fundamentals',
+        status: 'completed',
+        createdAt: new Date()
+      },
+      {
+        title: 'Deploy to GKE',
+        description: 'Deploy Node.js app to Kubernetes',
+        status: 'in-progress',
+        createdAt: new Date()
+      },
+      {
+        title: 'Write Documentation',
+        description: 'Complete project documentation',
+        status: 'pending',
+        createdAt: new Date()
+      }
+    ]);
+    
+    print('✅ Database initialized with sample data');
+

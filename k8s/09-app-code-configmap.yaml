@@ -1,0 +1,89 @@
+# ============================================
+# Node.js Application Code (ConfigMap)
+# Project: Node.js + MongoDB
+# Author: Aamir Qureshi
+# ============================================
+# Note: For production, use a container image instead
+# This ConfigMap approach is for demonstration purposes
+# ============================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodejs-app-code
+  namespace: mca-app
+  labels:
+    app: nodejs-api
+data:
+  package.json: |
+    {
+      "name": "nodejs-mongodb-api",
+      "version": "1.0.0",
+      "main": "server.js",
+      "dependencies": {
+        "express": "^4.18.2",
+        "mongoose": "^8.0.0",
+        "cors": "^2.8.5"
+      }
+    }
+  
+  server.js: |
+    const express = require('express');
+    const mongoose = require('mongoose');
+    const cors = require('cors');
+    
+    const app = express();
+    const PORT = process.env.PORT || 3000;
+    
+    app.use(cors());
+    app.use(express.json());
+    
+    // MongoDB Connection
+    const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mca_project';
+    
+    mongoose.connect(MONGO_URI)
+      .then(() => console.log('Connected to MongoDB'))
+      .catch(err => console.error('MongoDB error:', err));
+    
+    // Task Schema
+    const Task = mongoose.model('Task', {
+      title: { type: String, required: true },
+      description: String,
+      status: { type: String, default: 'pending' },
+      createdAt: { type: Date, default: Date.now }
+    });
+    
+    // Routes
+    app.get('/health', (req, res) => {
+      res.json({ status: 'healthy', time: new Date() });
+    });
+    
+    app.get('/', (req, res) => {
+      res.json({
+        message: 'Task Manager API',
+        author: 'Aamir Qureshi',
+        routes: ['GET /health', 'GET /api/tasks', 'POST /api/tasks']
+      });
+    });
+    
+    app.get('/api/tasks', async (req, res) => {
+      try {
+        const tasks = await Task.find();
+        res.json({ success: true, data: tasks });
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+      }
+    });
+    
+    app.post('/api/tasks', async (req, res) => {
+      try {
+        const task = await Task.create(req.body);
+        res.status(201).json({ success: true, data: task });
+      } catch (e) {
+        res.status(400).json({ error: e.message });
+      }
+    });
+    
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+

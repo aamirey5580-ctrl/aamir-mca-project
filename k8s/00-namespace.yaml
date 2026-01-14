@@ -1,0 +1,14 @@
+# ============================================
+# Namespace Configuration
+# Project: Node.js + MongoDB
+# Author: Aamir Qureshi
+# ============================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mca-app
+  labels:
+    name: mca-app
+    project: nodejs-mongodb
+    owner: aamir-qureshi
+
